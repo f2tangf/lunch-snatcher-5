@@ -42,8 +42,6 @@ import FoodImg10 from '@/../public/source/1-1-game/1-1-rice-cake.png';
 import FoodImg11 from '@/../public/source/1-1-game/1-1-sushi.png';
 import FoodImg12 from '@/../public/source/1-1-game/1-1-tofu.png';
 
-import CountdownTimer from '@/component/page/CountdownTimer'
-
 import foodTimerImg from '@/../public/source/1-1-game/1-1-timer.png';
 
 
@@ -126,10 +124,6 @@ export default function GamePage({onWin, onFail}) {
     // —— 打乱 9 个格子索引，使布局随机 ——  
     const [cells] = useState(() => shuffle(Array.from({length:9},(_,i)=>i)))
 
-    // 倒计时结束就自动判定失败
-    const handleTimeUp = () => onFail()
-
-
 
 
     return (
@@ -207,9 +201,7 @@ export default function GamePage({onWin, onFail}) {
                     priority
                 />
 
-            
-             {/* 30 秒倒计时 */}
-              <CountdownTimer start={30} onComplete={handleTimeUp} />
+         
             
             {/* 3×3 的同學食物圖示矩陣 */}
             <div
