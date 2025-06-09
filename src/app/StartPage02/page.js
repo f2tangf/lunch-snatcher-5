@@ -9,7 +9,7 @@ import BgImg2 from '@/../public/source/0-2-notice/0-2-bg.png';
 import GroupImg2 from '@/../public/source/0-2-notice/0-2-big-group.png';
 import NextBtnImg1 from '@/../public/source/0-1-notice/0-1-button.png';
 
-export default function StartPage02({nextStep}) {
+export default function StartPage02() {
     return (
       <>
         <div style={{ 

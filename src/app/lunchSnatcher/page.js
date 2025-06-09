@@ -53,7 +53,6 @@ export default function lunchSnatcher() {
   return (
   
         <>
-          
         <div style={{ 
           width: '100vw', 
           height: '100vh', 
@@ -68,16 +67,10 @@ export default function lunchSnatcher() {
             { gameState === 4 && <ResultPage01 onPlayAgain={playAgain} onHome={goHome} /> }
             { gameState === 5 && <ResultPage02 onPlayAgain={playAgain} onHome={goHome} /> }
           
-          
-            
-
-            
             </div>
 
-            
       </>
-    
-     
+
       
  );
       

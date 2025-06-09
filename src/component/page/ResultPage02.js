@@ -10,7 +10,7 @@ import MobileFrame from '@/component/layout/MobileFrame'
 import BgImg6 from '@/../public/source/2-2-result/2-2-bg.png';
 import GroupImg6 from '@/../public/source/2-2-result/2-2-big-group.png';
 import NextBtnImg5 from '@/../public/source/2-2-result/2-2-button-up.png';
-import NextBtnImg6 from '@/../public/source/2-2-result/2-2-button-up.png';
+import NextBtnImg6 from '@/../public/source/2-2-result/2-2-button-down.png';
 
 
 export default function ResultPage02() {
@@ -96,29 +96,29 @@ export default function ResultPage02() {
             </button>
 
              {/* 回首頁按鈕 */}
-             <button
-             
-             style={{ 
-               position: 'absolute',
-               bottom: '56px',
-               left: '50%',
-               transform: 'translateX(-50%)',
-               border: 'none',
-               background: 'none',
-               padding: 0,
-               cursor: 'pointer',
-               zIndex: 2,
-               transition: 'transform 0.3s ease'
-             }}
-           >
-             <Image
-               src={NextBtnImg6.src}
-               alt="回首頁"
-               width={250}
-               height={110}
-               style={{ objectFit: 'contain' }}
-             />
-           </button>
+              <button
+                onClick={() => router.push('https://classroomdaydream.vercel.app/')}
+                style={{ 
+                position: 'absolute',
+                bottom: '56px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                border: 'none',
+                background: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                zIndex: 2,
+                transition: 'transform 0.3s ease'
+              }}
+            >
+              <Image
+                src={NextBtnImg6.src}
+                alt="回首頁"
+                width={250}
+                height={110}
+                style={{ objectFit: 'contain' }}
+              />
+            </button>
             
             </div>
       </>

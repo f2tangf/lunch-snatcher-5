@@ -10,7 +10,7 @@ import MobileFrame from '@/component/layout/MobileFrame'
 import BgImg6 from '@/../public/source/2-2-result/2-2-bg.png';
 import GroupImg6 from '@/../public/source/2-2-result/2-2-big-group.png';
 import NextBtnImg5 from '@/../public/source/2-2-result/2-2-button-up.png';
-import NextBtnImg6 from '@/../public/source/2-2-result/2-2-button-up.png';
+import NextBtnImg6 from '@/../public/source/2-2-result/2-2-button-down.png';
 
 
 export default function ResultPage02() {
@@ -72,7 +72,7 @@ export default function ResultPage02() {
     
             {/* 再玩一次按鈕 */}
             <button
-             
+        
               style={{ 
                 position: 'absolute',
                 bottom: '166px',
@@ -97,8 +97,8 @@ export default function ResultPage02() {
 
              {/* 回首頁按鈕 */}
              <button
-             
-             style={{ 
+              onClick={() => router.push('https://classroomdaydream.vercel.app/')}
+              style={{ 
                position: 'absolute',
                bottom: '56px',
                left: '50%',
