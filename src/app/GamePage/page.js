@@ -55,6 +55,8 @@ export default function GamePage({onWin, onFail}) {
     const ROWS        = 3
     const COLS        = 3
     const CURSOR_SIZE = 65
+    const CELL_W = PANEL_W / COLS
+    const CELL_H = PANEL_H / ROWS
     // 同學食物面板尺寸
     const FOODPANEL_W = 370
     const FOODPANEL_H = 520
@@ -67,6 +69,10 @@ export default function GamePage({onWin, onFail}) {
      const foodTimerROWS = 3
      const foodTimerCOLS = 3
      const foodTimer_SIZE = 82
+     const ICON_SIZE   = 80      // 计时器图示正方
+     const BAR_W       = 47      // 绿色倒计时条长度
+     const BAR_H       = 11      // 高度
+     const BAR_MARGIN  = 11      // 条距离 icon 底部的间距
 
 
 
@@ -76,6 +82,8 @@ export default function GamePage({onWin, onFail}) {
      // 同學食物生成中心点比例：1/6,3/6,5/6
      const foodRowFrac = Array.from({ length: FOODROWS }, (_, r) => (2 * r + 1) / (2 * FOODROWS))
      const foodColFrac = Array.from({ length: FOODCOLS }, (_, c) => (2 * c + 1) / (2 * FOODCOLS))
+     
+    const allMyFoods = [MyFoodImg1, MyFoodImg2, /*…*/ MyFoodImg12]
       // 食物計時器生成中心点比例：1/6,3/6,5/6
       const foodTimerRowFrac = Array.from({ length: foodTimerROWS }, (_, r) => (2 * r + 1) / (2 * foodTimerROWS))
       const foodTimerColFrac = Array.from({ length: foodTimerCOLS }, (_, c) => (2 * c + 1) / (2 * foodTimerCOLS))
@@ -94,6 +102,28 @@ export default function GamePage({onWin, onFail}) {
 
     // 半圆是否可见
     const [showDot, setShowDot] = useState(true)
+
+    function shuffle(arr) {
+      const a = [...arr]
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i+1))
+        ;[a[i], a[j]] = [a[j], a[i]]
+      }
+      return a
+    }
+
+
+    // —— 打乱 12 张食物，取前 4 张 ——  
+    const allFoods = [
+      FoodImg1, FoodImg2, FoodImg3, FoodImg4,
+      FoodImg5, FoodImg6, FoodImg7, FoodImg8,
+      FoodImg9, FoodImg10, FoodImg11, FoodImg12
+    ]
+    const [foods] = useState(() => shuffle(allFoods).slice(0, 9))
+
+    // —— 打乱 9 个格子索引，使布局随机 ——  
+    const [cells] = useState(() => shuffle(Array.from({length:9},(_,i)=>i)))
+
 
 
     return (

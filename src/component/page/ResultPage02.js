@@ -72,7 +72,7 @@ export default function ResultPage02() {
     
             {/* 再玩一次按鈕 */}
             <button
-             
+             onClick={onPlayAgain}
               style={{ 
                 position: 'absolute',
                 bottom: '166px',
@@ -119,6 +119,7 @@ export default function ResultPage02() {
                 style={{ objectFit: 'contain' }}
               />
             </button>
+           
             
             </div>
       </>
