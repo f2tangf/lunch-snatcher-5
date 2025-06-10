@@ -13,7 +13,7 @@ import NextBtnImg5 from '@/../public/source/2-2-result/2-2-button-up.png';
 import NextBtnImg6 from '@/../public/source/2-2-result/2-2-button-down.png';
 
 
-export default function ResultPage02() {
+export default function ResultPage02({onPlayAgain, onHome}) {
 
   const router = useRouter();
 

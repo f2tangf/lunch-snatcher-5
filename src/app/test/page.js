@@ -8,7 +8,7 @@ import Image from "next/image";
 import MobileFrame from '@/component/layout/MobileFrame'
 import BgImg7 from '@/../public/source/1-1-game/1-1-bg.png';
 import GroupImg7 from '@/../public/source/1-1-game/1-1-desk group.png';
-import GroupImg8 from '@/../public/source/1-1-game/1-1-my-box-bg.png';
+import GroupImg8 from '@/../public/source/1-1-game/1-1-notice-box.png';
 import GroupImg9 from '@/../public/source/1-1-game/1-1-life-line-long 3.png';
 import UpImg from '@/../public/source/1-1-game/1-1-arrow-keys-up.png';
 import LeftImg from '@/../public/source/1-1-game/1-1-arrow-keys-left.png';
@@ -42,6 +42,8 @@ import FoodImg10 from '@/../public/source/1-1-game/1-1-rice-cake.png';
 import FoodImg11 from '@/../public/source/1-1-game/1-1-sushi.png';
 import FoodImg12 from '@/../public/source/1-1-game/1-1-tofu.png';
 
+import CountdownTimer from '@/component/page/CountdownTimer'
+
 import foodTimerImg from '@/../public/source/1-1-game/1-1-timer.png';
 
 
@@ -62,7 +64,7 @@ export default function GamePage({onWin, onFail}) {
     const FOODPANEL_H = 520
     const FOODROWS = 3
     const FOODCOLS = 3
-    const FOOD_SIZE = 42
+    const FOOD_SIZE = 50
      // 食物計時器面板尺寸
      const foodTimerPANEL_W = 370
      const foodTimerPANEL_H = 520
@@ -84,9 +86,6 @@ export default function GamePage({onWin, onFail}) {
      const foodColFrac = Array.from({ length: FOODCOLS }, (_, c) => (2 * c + 1) / (2 * FOODCOLS))
      
     const allMyFoods = [MyFoodImg1, MyFoodImg2, /*…*/ MyFoodImg12]
-      // 食物計時器生成中心点比例：1/6,3/6,5/6
-      const foodTimerRowFrac = Array.from({ length: foodTimerROWS }, (_, r) => (2 * r + 1) / (2 * foodTimerROWS))
-      const foodTimerColFrac = Array.from({ length: foodTimerCOLS }, (_, c) => (2 * c + 1) / (2 * foodTimerCOLS))
 
 
     const [pos, setPos] = useState({ row: 1, col: 1 })
@@ -100,29 +99,12 @@ export default function GamePage({onWin, onFail}) {
     const moveLeft  = () => setPos(p => ({ ...p, col: Math.max(0,     p.col-1) }))
     const moveRight = () => setPos(p => ({ ...p, col: Math.min(COLS-1, p.col+1) }))
 
-    // 半圆是否可见
-    const [showDot, setShowDot] = useState(true)
+   
 
-    function shuffle(arr) {
-      const a = [...arr]
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i+1))
-        ;[a[i], a[j]] = [a[j], a[i]]
-      }
-      return a
-    }
+    
+    {/* 30 秒倒计时，结束直接判定失败 */}
+   <CountdownTimer start={30} onComplete={onFail} />
 
-
-    // —— 打乱 12 张食物，取前 4 张 ——  
-    const allFoods = [
-      FoodImg1, FoodImg2, FoodImg3, FoodImg4,
-      FoodImg5, FoodImg6, FoodImg7, FoodImg8,
-      FoodImg9, FoodImg10, FoodImg11, FoodImg12
-    ]
-    const [foods] = useState(() => shuffle(allFoods).slice(0, 9))
-
-    // —— 打乱 9 个格子索引，使布局随机 ——  
-    const [cells] = useState(() => shuffle(Array.from({length:9},(_,i)=>i)))
 
 
 
@@ -201,7 +183,9 @@ export default function GamePage({onWin, onFail}) {
                     priority
                 />
 
-         
+            
+            {/* 30 秒倒计时，结束自动调用 onFail -> gameState = 5 */}
+            <CountdownTimer start={5} onComplete={onFail} />
             
             {/* 3×3 的同學食物圖示矩陣 */}
             <div
@@ -242,130 +226,6 @@ export default function GamePage({onWin, onFail}) {
             </div>
 
 
-            {/* 3×3 的食物計時器圖示矩陣 */}
-            <div
-              style={{
-                position:  'absolute',
-                left:      '50%',
-                top:       '50%',
-                transform: 'translate(-51%,-45%)',
-                width:     foodTimerPANEL_W,
-                height:    foodTimerPANEL_H
-              }}
-            >
-            
-              {Array.from({ length: foodTimerROWS * foodTimerCOLS }).map((_, idx) => {
-                const row = Math.floor(idx / foodTimerCOLS)
-                const col = idx % foodTimerCOLS
-
-              // 计算真正的像素坐标，再减去 half size 让图片中心对准
-              const x = foodTimerColFrac[col] * foodTimerPANEL_W - foodTimer_SIZE / 2
-              const y = foodTimerRowFrac[row] * foodTimerPANEL_H - foodTimer_SIZE / 2
-
-              return (
-                <Image
-                  key={idx}
-                  src={foodTimerImg}
-                  alt="foodTimer"
-                  width={foodTimer_SIZE}
-                  height={foodTimer_SIZE}
-                  style={{
-                    position: 'absolute',
-                    left:     `${x}px`,
-                    top:      `${y}px`,
-                    zIndex:   5
-                  }}
-                />
-              )
-            })}
-            </div>
-
-
-            <div>
-              
-              <>
-              {/* 時間條 */}
-              <div
-                style={{
-                  position:  'absolute',
-                  left:      'calc(50% + 5px)',
-                  top:       'calc(50% - 1px)',
-                  transform: 'translate(-50%,-49%)',
-                }}
-              >
-                {/* wrapper：control panel 大小 */}
-                <div style={{
-                  position: 'relative',
-                  width:    '47px',  // 初始条长
-                  height:   '11px',
-                }}>
-                  {/* 缩长的条，动画结束时隐藏半圆 */}
-                  <div
-                    className="timer-bar"
-                    onAnimationEnd={() => setShowDot(false)}
-                  >
-                    {/* 半圆：绝对定位在条容器里 */}
-                    {showDot && <div className="timer-dot" />}
-                  </div>
-                </div>
-              </div>
-
-              {/* CSS */}
-              <style jsx>{`
-                .timer-bar {
-                  position: relative;
-                  width: 47px;
-                  height: 11px;
-                  background: #00BE87;
-                  transform-origin: left center;
-                  animation: shrink 10s linear forwards;
-                }
-                .timer-dot {
-                  position: absolute;
-                  left:       100%;       /* 总是贴在条的最右端 */
-                  top:        50%;
-                  transform:  translate(-50%,-50%);
-                  width:      11px;
-                  height:     11px;
-                  border-top-right-radius:    50%;
-                  border-bottom-right-radius: 50%;
-                  background: #00BE87;
-                }
-                @keyframes shrink {
-                  from { width: 47px; }
-                  to   { width: 0px;  }
-                }
-              `}</style>
-            </>
-            </div>
-
-            {/* 3×2 的食物圖示矩陣 */}
-            <div
-              style={{
-                position:      'absolute',
-                bottom:           '89px',    // 根據便當盒內邊距微調
-                right:          '50%',
-                transform: 'translate(-10%, 0%)',
-                display:       'grid',
-                gridTemplateColumns: 'repeat(3, 40px)',
-                gridTemplateRows:    'repeat(2, 40px)',
-                gap:           '2px',     // 格子間距
-                zIndex:        15
-              }}
-            >
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Image
-                  key={i}
-                  src={MyFoodImg1}
-                  alt="MyFood"
-                  width={40}
-                  height={40}
-                  style={{ objectFit:'contain' }}
-                />
-              ))}
-            </div>
-
-
             {/* 方向鍵 */}
           <button
            
@@ -373,7 +233,7 @@ export default function GamePage({onWin, onFail}) {
               position: 'absolute',  // ← 2. 轉成絕對定位
               bottom: '30px',
               left: '50%',  // ← 相對 control-panel 寬度的 70%
-              transform: 'translate(15%, -50%)',
+              transform: 'translate(-10%, -25%)',
               border: 'none',
               background: 'none',
               padding: 0,
@@ -396,8 +256,8 @@ export default function GamePage({onWin, onFail}) {
                 <Image
                 src={UpImg.src}
                 alt="上"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveUp}
                 />
@@ -409,15 +269,15 @@ export default function GamePage({onWin, onFail}) {
                 flexDirection: 'row',          // 水平排列
                 justifyContent: 'center',      // 水平置中（也可改成 space-between / space-around）
                 alignItems: 'center',          // 垂直置中
-                gap: '5px'                    // 三個按鈕之間的間距
+                gap: '8px'                    // 三個按鈕之間的間距
                 }}
             >
                         
               <Image
                 src={LeftImg.src}
                 alt="左"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveLeft}
               />
@@ -425,8 +285,8 @@ export default function GamePage({onWin, onFail}) {
               <Image
                 src={DownImg.src}
                 alt="下"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveDown}
               />
@@ -434,8 +294,8 @@ export default function GamePage({onWin, onFail}) {
               <Image
                 src={RightImg.src}
                 alt="右"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveRight}
               />
@@ -446,24 +306,7 @@ export default function GamePage({onWin, onFail}) {
 
                  
                   
-          {/* 素材：生命值底圖 */}
-          <Image
-            src={GroupImg9.src}
-            alt="生命值底圖"
-            width={320}
-            height={39}
-            maxWidth={393}    // 手機時上限 393
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              objectFit: 'contain',
-              zIndex: 30
-            }}
-            priority
-          />
-
+          
           {/* 游標面板容器：先置中 */}
           <div
             style={{

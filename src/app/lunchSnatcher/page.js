@@ -33,10 +33,10 @@ export default function lunchSnatcher() {
   const onNext = () => setGameState(s => s + 1)
   // GamePage 專用
   const onWin  = () => setGameState(4)
-  const onFail = () => setGameState(5)
+  const onFail = () => setGameState(5) // ← 5 对应 ResultPage02
   // ResultPage 回 Home 或 再玩一次
   const goHome     = () => setGameState(0)
-  const playAgain  = () => setGameState(3)
+  const playAgain  = () => setGameState(4)
 
 
 

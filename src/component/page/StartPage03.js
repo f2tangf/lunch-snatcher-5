@@ -6,7 +6,7 @@ import Image from "next/image";
 
 import MobileFrame from '@/component/layout/MobileFrame'
 import BgImg3 from '@/../public/source/0-3-notice/0-3-bg.png';
-import GroupImg3 from '@/../public/source/0-3-notice/0-3-big-group.png';
+import GroupImg3 from '@/../public/source/0-3-notice/0-3-big-group2.png';
 import NextBtnImg2 from '@/../public/source/0-3-notice/0-3-button.png';
 
 export default function StartPage03({onNext}) {
