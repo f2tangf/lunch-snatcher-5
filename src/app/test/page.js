@@ -16,18 +16,6 @@ import DownImg from '@/../public/source/1-1-game/1-1-arrow-keys-down.png';
 import RightImg from '@/../public/source/1-1-game/1-1-arrow-keys-right.png';
 import CursorImg from '@/../public/source/1-1-game/1-1-mouse.png';
 
-import MyFoodImg1 from '@/../public/source/1-1-game/1-1-my-food-button-brocoli.png';
-import MyFoodImg2 from '@/../public/source/1-1-game/1-1-my-food-button-bubble-tea.png';
-import MyFoodImg3 from '@/../public/source/1-1-game/1-1-my-food-button-chicken.png';
-import MyFoodImg4 from '@/../public/source/1-1-game/1-1-my-food-button-dango.png';
-import MyFoodImg5 from '@/../public/source/1-1-game/1-1-my-food-button-hamburger-steak.png';
-import MyFoodImg6 from '@/../public/source/1-1-game/1-1-my-food-button-okonomiyaki.png';
-import MyFoodImg7 from '@/../public/source/1-1-game/1-1-my-food-button-pudding.png';
-import MyFoodImg8 from '@/../public/source/1-1-game/1-1-my-food-button-ratatouille.png';
-import MyFoodImg9 from '@/../public/source/1-1-game/1-1-my-food-button-rice-ball.png';
-import MyFoodImg10 from '@/../public/source/1-1-game/1-1-my-food-button-rice-cake.png';
-import MyFoodImg11 from '@/../public/source/1-1-game/1-1-my-food-button-sushi.png';
-import MyFoodImg12 from '@/../public/source/1-1-game/1-1-my-food-button-tofu.png';
 
 import FoodImg1 from '@/../public/source/1-1-game/1-1-brocoli.png';
 import FoodImg2 from '@/../public/source/1-1-game/1-1-bubble-tea.png';
@@ -65,16 +53,6 @@ export default function GamePage({onWin, onFail}) {
     const FOODROWS = 3
     const FOODCOLS = 3
     const FOOD_SIZE = 50
-     // 食物計時器面板尺寸
-     const foodTimerPANEL_W = 370
-     const foodTimerPANEL_H = 520
-     const foodTimerROWS = 3
-     const foodTimerCOLS = 3
-     const foodTimer_SIZE = 82
-     const ICON_SIZE   = 80      // 计时器图示正方
-     const BAR_W       = 47      // 绿色倒计时条长度
-     const BAR_H       = 11      // 高度
-     const BAR_MARGIN  = 11      // 条距离 icon 底部的间距
 
 
 
@@ -85,7 +63,7 @@ export default function GamePage({onWin, onFail}) {
      const foodRowFrac = Array.from({ length: FOODROWS }, (_, r) => (2 * r + 1) / (2 * FOODROWS))
      const foodColFrac = Array.from({ length: FOODCOLS }, (_, c) => (2 * c + 1) / (2 * FOODCOLS))
      
-    const allMyFoods = [MyFoodImg1, MyFoodImg2, /*…*/ MyFoodImg12]
+    
 
 
     const [pos, setPos] = useState({ row: 1, col: 1 })
@@ -99,18 +77,124 @@ export default function GamePage({onWin, onFail}) {
     const moveLeft  = () => setPos(p => ({ ...p, col: Math.max(0,     p.col-1) }))
     const moveRight = () => setPos(p => ({ ...p, col: Math.min(COLS-1, p.col+1) }))
 
-   
 
     
-    {/* 30 秒倒计时，结束直接判定失败 */}
-   <CountdownTimer start={30} onComplete={onFail} />
+    // 在 GamePage 最上方，import 完 FoodImg1～12 之後
+    const allMyFoods = [
+      { src: FoodImg1, score: 5 },
+      { src: FoodImg2, score: 10 },
+      { src: FoodImg3, score: 20 },
+      { src: FoodImg4, score: 5 },
+      { src: FoodImg5, score: 10 },
+      { src: FoodImg6, score: 20 },
+      { src: FoodImg7, score: 5 },
+      { src: FoodImg8, score: 10 },
+      { src: FoodImg9, score: 20 },
+      { src: FoodImg10, score: 5 },
+      { src: FoodImg11, score: 10 },
+      { src: FoodImg12, score: 20 },
+    ]
+    
+    
+    {/* 遊戲計分器 */}
+    // 1. score state
+      const [score, setScore] = useState(0);
+
+      // 吃到食物時呼它：setScore(s => s + 增分)
+      const addScore = delta => setScore(s => s + delta);
+
+      // 倒數結束時的 handler
+      const handleTimeUp = () => {
+        if (score >= 100) {
+          onWin();   // 分數 >= 100 → ResultPage01
+          } else {
+          onFail();  // 分數 < 100  → ResultPage02
+        }
+      };
+
+      useEffect(() => {
+        if (score >= 100) {
+          onWin();
+        }
+      }, [score]);
 
 
 
+      // 1. 這個 state 用來存當前要顯示的那四個食物
+      const [foodSpawns, setFoodSpawns] = useState([]) 
 
+      useEffect(() => {
+        const showDuration = 3000; // 顯示 3 秒
+        const gapDuration  = 200;  // 顯示結束後間隔 0.5 秒
+        let hideTimer;
+    
+        const spawnFoods = () => {
+          // 1. 隨機 4 個不同位置 (0~8)
+          const positions = [];
+          while (positions.length < 4) {
+            const n = Math.floor(Math.random() * FOODROWS * FOODCOLS);
+            if (!positions.includes(n)) positions.push(n);
+          }
+    
+          // 2. 隨機抽 4 張「圖 + 分數」
+          const picks = [...allMyFoods]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 4);
+    
+          // 3. 合併位置、圖、分數與真實像素 x,y
+          const items = positions.map((posIdx, i) => {
+            const row = Math.floor(posIdx / FOODCOLS);
+            const col = posIdx % FOODCOLS;
+            const x = foodColFrac[col] * FOODPANEL_W - FOOD_SIZE / 2;
+            const y = foodRowFrac[row] * FOODPANEL_H - FOOD_SIZE / 2;
+            return {
+              id:    posIdx,
+              src:   picks[i].src,
+              score: picks[i].score,
+              x, y
+            };
+          });
+    
+          setFoodSpawns(items);
+    
+          // 3 秒後自動清空
+          hideTimer = setTimeout(() => setFoodSpawns([]), showDuration);
+        };
+    
+        // 首次立即產生
+        spawnFoods();
+        // 每 (3 秒顯示 + 0.5 秒間隔) 召喚新一組
+        const intervalId = setInterval(spawnFoods, showDuration + gapDuration);
+    
+        return () => {
+          clearInterval(intervalId);
+          clearTimeout(hideTimer);
+        };
+      }, []);
+    
+      // -------- 游標移動後檢測是否踩中食物 --------
+      useEffect(() => {
+        const idx = pos.row * FOODCOLS + pos.col;
+        const hit = foodSpawns.find(item => item.id === idx);
+        if (hit) {
+          // 加分、立即把這顆食物從陣列裡移除
+          setScore(s => {
+            const newScore = s + hit.score;
+            if (newScore >= 100) {
+              onWin();            // 立刻成功，跳到 ResultPage01
+            }
+            return newScore;
+          });
+          setFoodSpawns(fs => fs.filter(f => f.id !== idx));
+        }
+      }, [pos]);
+
+    
+    
+  
+    
     return (
       <>
-
 
         <div style={{ 
           width: '100vw', 
@@ -118,8 +202,6 @@ export default function GamePage({onWin, onFail}) {
           position: 'relative',
           overflow: 'hidden'
           }}>
-
-
 
 
           {/* 背景圖片 */}
@@ -171,7 +253,6 @@ export default function GamePage({onWin, onFail}) {
                     alt="通知窗"
                     width={350}
                     height={750}
-                    maxWidth={393}    // 手機時上限 393
                     style={{
                         position: 'absolute',
                         bottom: 0,
@@ -183,47 +264,70 @@ export default function GamePage({onWin, onFail}) {
                     priority
                 />
 
+
+              {/* 30 秒倒计时，结束直接判定失败 */}
+              <CountdownTimer start={30} onComplete={() => {
+                // 倒數歸零時，只有在低於 100 才判失敗
+                  if (score < 100) onFail();
+                 }} 
+              />
+
             
-            {/* 30 秒倒计时，结束自动调用 onFail -> gameState = 5 */}
-            <CountdownTimer start={5} onComplete={onFail} />
+              {/* 左下角分數顯示 */}
+              <div style={{
+                position: 'absolute',
+                bottom: 80,
+                left: '50%',
+                transform: 'translateX(-125%)',
+                background: 'rgba(0,0,0,0.4)',
+                padding: '30px 12px',
+                borderRadius: '4px',
+                color: '#FFF',
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                zIndex: '15'
+              }}>
+                Score：{score}
+              </div>
+
             
-            {/* 3×3 的同學食物圖示矩陣 */}
+            
+        
+        
+           {/* 3×3 同學食物矩陣 */}
             <div
               style={{
-                position:  'absolute',
-                left:      '50%',
-                top:       '50%',
-                transform: 'translate(-42%,-77%)',
-                width:     FOODPANEL_W,
-                height:    FOODPANEL_H
+                position: 'absolute',
+                left:     '50%',
+                top:      '50%',
+                transform:'translate(-42%, -77%)',
+                width:    FOODPANEL_W,
+                height:   FOODPANEL_H,
               }}
             >
-            
               {Array.from({ length: FOODROWS * FOODCOLS }).map((_, idx) => {
-                const row = Math.floor(idx / FOODCOLS)
-                const col = idx % FOODCOLS
+                const spawn = foodSpawns.find(f => f.id === idx)
+                if (!spawn) return null
 
-              // 计算真正的像素坐标，再减去 half size 让图片中心对准
-              const x = foodColFrac[col] * FOODPANEL_W - FOOD_SIZE / 2
-              const y = foodRowFrac[row] * FOODPANEL_H - FOOD_SIZE / 2
-
-              return (
-                <Image
-                  key={idx}
-                  src={FoodImg1}
-                  alt="food"
-                  width={FOOD_SIZE}
-                  height={FOOD_SIZE}
-                  style={{
-                    position: 'absolute',
-                    left:     `${x}px`,
-                    top:      `${y}px`,
-                    zIndex:   5
-                  }}
-                />
-              )
-            })}
+                return (
+                  <Image
+                    key={spawn.id}
+                    src={spawn.src}
+                    alt="food"
+                    width={FOOD_SIZE}
+                    height={FOOD_SIZE}
+                    style={{
+                      position: 'absolute',
+                      left:     `${spawn.x}px`,
+                      top:      `${spawn.y}px`,
+                      zIndex:   5,
+                    }}
+                  />
+                )
+              })}
             </div>
+
+
 
 
             {/* 方向鍵 */}
@@ -233,7 +337,7 @@ export default function GamePage({onWin, onFail}) {
               position: 'absolute',  // ← 2. 轉成絕對定位
               bottom: '30px',
               left: '50%',  // ← 相對 control-panel 寬度的 70%
-              transform: 'translate(-10%, -25%)',
+              transform: 'translate(-5%, -38%)',
               border: 'none',
               background: 'none',
               padding: 0,
@@ -256,8 +360,8 @@ export default function GamePage({onWin, onFail}) {
                 <Image
                 src={UpImg.src}
                 alt="上"
-                width={50}
-                height={50}
+                width={45}
+                height={45}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveUp}
                 />
@@ -276,8 +380,8 @@ export default function GamePage({onWin, onFail}) {
               <Image
                 src={LeftImg.src}
                 alt="左"
-                width={50}
-                height={50}
+                width={45}
+                height={45}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveLeft}
               />
@@ -285,8 +389,8 @@ export default function GamePage({onWin, onFail}) {
               <Image
                 src={DownImg.src}
                 alt="下"
-                width={50}
-                height={50}
+                width={45}
+                height={45}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveDown}
               />
@@ -294,8 +398,8 @@ export default function GamePage({onWin, onFail}) {
               <Image
                 src={RightImg.src}
                 alt="右"
-                width={50}
-                height={50}
+                width={45}
+                height={45}
                 style={{ objectFit: 'contain', cursor: 'pointer' }}
                 onClick={moveRight}
               />

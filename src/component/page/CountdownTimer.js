@@ -12,9 +12,9 @@ export default function CountdownTimer({
       onComplete()
       return
     }
-    const timerId = setTimeout(() => setTime(time - 1), 1000)
-    return () => clearTimeout(timerId)
-  }, [time, onComplete])
+    const id = setTimeout(() => setTime(time - 1), 1000);
+    return () => clearTimeout(id);
+  }, [time, onComplete]);
 
   // 格式化 mm:ss，如果纯秒数也可以直接 `{time}`
   const mm = String(Math.floor(time / 60)).padStart(2, '0')
