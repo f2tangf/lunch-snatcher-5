@@ -36,7 +36,14 @@ import foodTimerImg from '@/../public/source/1-1-game/1-1-timer.png';
 
 
 
-export default function GamePage({onWin, onFail}) {
+export default function GamePage({ onWin, onFail }) {
+
+  const [score, setScore]         = useState(0);
+  const didMountRef               = useRef(false);
+
+
+
+  const [pos, setPos] = useState({ row: 1, col: 1 })
  
     {/* 游標矩陣 */} {/* 同學食物矩陣 */}{/* 食物計時器矩陣 */}  
     // 游標面板尺寸
@@ -66,7 +73,7 @@ export default function GamePage({onWin, onFail}) {
     
 
 
-    const [pos, setPos] = useState({ row: 1, col: 1 })
+    
 
     // 算出畫面上游標的絕對座標
     const x = colFrac[pos.col] * PANEL_W - CURSOR_SIZE/2
@@ -97,26 +104,21 @@ export default function GamePage({onWin, onFail}) {
     
     
     {/* 遊戲計分器 */}
-    // 1. score state
-      const [score, setScore] = useState(0);
 
       // 吃到食物時呼它：setScore(s => s + 增分)
       const addScore = delta => setScore(s => s + delta);
 
-      // 倒數結束時的 handler
-      const handleTimeUp = () => {
-        if (score >= 100) {
-          onWin();   // 分數 >= 100 → ResultPage01
-          } else {
-          onFail();  // 分數 < 100  → ResultPage02
-        }
-      };
-
+      // 跳過第一次 mount
       useEffect(() => {
+        if (!didMountRef.current) {
+          didMountRef.current = true;
+          return;
+        }
         if (score >= 100) {
+          // 分數一但 ≥100，立刻 onWin
           onWin();
         }
-      }, [score]);
+      }, [score, onWin]);
 
 
 
@@ -172,22 +174,29 @@ export default function GamePage({onWin, onFail}) {
         };
       }, []);
     
-      // -------- 游標移動後檢測是否踩中食物 --------
+      // 同學吃到食物時的偵測（pos 變動後觸發）
       useEffect(() => {
         const idx = pos.row * FOODCOLS + pos.col;
-        const hit = foodSpawns.find(item => item.id === idx);
+        const hit = foodSpawns.find(f => f.id === idx);
         if (hit) {
-          // 加分、立即把這顆食物從陣列裡移除
-          setScore(s => {
-            const newScore = s + hit.score;
-            if (newScore >= 100) {
-              onWin();            // 立刻成功，跳到 ResultPage01
-            }
-            return newScore;
-          });
+          // 先計算新分數
+          const newScore = score + hit.score;
+          setScore(newScore);
+          // 把這個食物清掉
           setFoodSpawns(fs => fs.filter(f => f.id !== idx));
+          // 若新分數已經 >=100，就在這裡呼叫 onWin
+          if (newScore >= 100) {
+            onWin();
+          }
         }
-      }, [pos]);
+      }, [pos]);  // eslint-disable-line react-hooks/exhaustive-deps
+
+      // 倒數結束的 handler
+      const handleTimeUp = () => {
+        if (score >= 100) onWin();
+        else onFail();
+      };
+
 
     
     
@@ -265,12 +274,8 @@ export default function GamePage({onWin, onFail}) {
                 />
 
 
-              {/* 30 秒倒计时，结束直接判定失败 */}
-              <CountdownTimer start={30} onComplete={() => {
-                // 倒數歸零時，只有在低於 100 才判失敗
-                  if (score < 100) onFail();
-                 }} 
-              />
+              {/* 計時器輸贏判斷*/}
+               <CountdownTimer start={30} onComplete={handleTimeUp} />
 
             
               {/* 左下角分數顯示 */}
